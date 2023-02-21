@@ -1,0 +1,8 @@
+-Xms512m
+-Xmx1024m
+-Dcom.ibm.mq.cfg.useIBMCipherMappings=false
+-Djavax.net.ssl.keyStore=/opt/$SERVER_NAME/conf/keystore/cis-keystore.jks 
+-Djavax.net.ssl.keyStorePassword=${KEY_PASSWD} 
+-Djavax.net.ssl.trustStore=/opt/$SERVER_NAME/conf/keystore/cis-dbkey.jks 
+-Djavax.net.ssl.trustStorePassword=${SSL_PASSWD} 
+-Djavax.net.ssl.trustStoreType=JKS

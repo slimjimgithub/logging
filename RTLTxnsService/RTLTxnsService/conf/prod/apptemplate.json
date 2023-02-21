@@ -1,0 +1,331 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "rtl-txns-service-v1",
+        "creationTimestamp": null,
+         "annotations": {
+                    "description": "Template to create new OneBanking services app inside openshift",
+                    "openshift.io/display-name": "Retail Txns Service"
+                }
+    },
+    "message": "The Following service(s) have been created",
+    "objects": [
+
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${service_name}",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "${service_name}",
+                    "sourcetype": "rtl-txns-svc"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftNewApp",
+                    "index": "au_k8s_payments_app"
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "${image_tag}",
+                        "annotations": {
+                            "openshift.io/imported-from": "${docker_url}"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "${docker_url}"
+                        },
+                        "generation": null,
+                        "importPolicy": {
+                            "insecure": true
+                        },
+                        "referencePolicy": {
+                            "type": ""
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "dockerImageRepository": ""
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${service_name}",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "${service_name}",
+                    "sourcetype": "rtl-txns-svc"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftNewApp",
+                    "index": "au_k8s_payments_app"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "resources": {}
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "${service_name}",
+                    "deploymentconfig": "${service_name}"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "${service_name}",
+                            "deploymentconfig": "${service_name}"
+                        },
+                        "annotations": {
+                            "openshift.io/generated-by": "OpenShiftNewApp",
+							"index": "au_k8s_payments_app"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "${service_name}",
+                                "image": "${docker_url}",
+                                "ports": [
+                                    {
+                                        "containerPort": 80,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    },
+									{
+                                        "containerPort": "${port_name}",
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "containerPort": 9443,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+						"env": [
+                                  {
+                                    "name": "MY_NODE_NAME",
+                                    "valueFrom": {
+                                      "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                      }
+                                    }
+                                  },
+								   {
+                                    "name": "KEY_PASSWD",
+                                    "valueFrom": {
+                                      "secretKeyRef": {
+                                        "name": "${key_secret_name}",
+                                        "key": "KEY_PASSWD"
+                                     }
+                                    }
+                                  },
+                                    {
+										"name": "SSL_PWD",
+										"valueFrom": {
+											"secretKeyRef": {
+												"name": "${key_secret_name}",
+												"key": "SSL_PWD"
+											}
+										}
+									}
+                                ],
+                                "volumeMounts":[
+                                        {
+                                           "name": "env-prop-dir",
+                                           "mountPath": "/opt/${server_name}/conf/"
+                                        },
+                                        {
+                                           "name": "keystore-dir",
+                                           "mountPath": "/opt/${server_name}/conf/keystore/"
+                                        }
+                                     ],
+                                "resources": {}
+                            }
+                        ],
+                                "volumes": [
+                             {
+                                "name": "env-prop-dir",
+                                "configMap": {
+                                   "name": "${app_config_map}",
+                                   "items": [
+                                      {
+                                         "key": "${properties_file}",
+                                         "path": "${env_properties_file}"
+                                      },
+                                      {
+                                         "key": "${app_properties_file}",
+                                         "path": "${application_properties_file}"
+                                      },
+                                      {
+                                         "key": "${jvmoptions_file}",
+                                         "path": "${jvmoptions_file}"
+                                      }
+                                   ]
+                                }                            
+                            },
+                            {
+                                "name": "keystore-dir",                              
+                                "secret": {
+                                   "secretName": "${key_secret_name}"
+                                   
+                                }
+                            }
+                           
+                            
+                          ]
+                    }
+                }
+            },
+            "status": {
+                "latestVersion": 0,
+                "observedGeneration": 0,
+                "replicas": 0,
+                "updatedReplicas": 0,
+                "availableReplicas": 0,
+                "unavailableReplicas": 0
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${service_name}",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "${service_name}",
+                    "sourcetype": "rtl-txns-svc"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftNewApp",
+                    "index": "au_k8s_payments_app"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "80-tcp",
+                        "protocol": "TCP",
+                        "port": 80,
+                        "targetPort": 80
+                    },
+                    {
+                        "name": "8080-tcp",
+                        "protocol": "TCP",
+                        "port": 8080,
+                        "targetPort": 8080
+                    },
+                    {
+                        "name": "9443-tcp",
+                        "protocol": "TCP",
+                        "port": 9443,
+                        "targetPort": 9443
+                    }
+                ],
+                "selector": {
+                    "app": "${service_name}",
+                    "deploymentconfig": "${service_name}"
+                }
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        }
+    ],
+"parameters": [
+    {
+        "name": "service_name",
+        "required": true,
+        "description": "Same as New-App Openshift Name "
+    },
+     {
+        "name": "server_name",
+        "required": true,
+        "description": "Liberty Server Service Name - Check the DockerFile"
+        
+    },
+     {
+        "name": "app_config_map",
+        "required": true,
+        "description": "Config Map Name for this Service"        
+    },
+     {
+        "name": "docker_url",
+        "required": true,
+        "description": "Entire Docker URL with Image Tag"        
+    },
+     {
+        "name": "properties_file",
+        "required": true,
+        "description": "Properties file Name which was added to the Config Map"        
+    },
+    {
+        "name": "env_properties_file",
+        "required": true,
+        "description": "Properties file Name which was added to the Config Map",
+        "value": "application-default.properties"      
+    },
+    {
+        "name": "app_properties_file",
+        "required": true,
+        "description": "Properties file Name which was added to the Config Map"        
+    },
+    {
+        "name": "application_properties_file",
+        "required": true,
+        "description": "Properties file Name which was added to the Config Map",
+        "value": "application.properties"      
+    },
+    {
+        "name": "port_name",
+        "required": true,
+        "description": "Port Name which was added to the Config Map for creating route",
+        "value": "28099"
+    },
+     
+     {
+        "name": "jvmoptions_file",
+        "required": true,
+        "description": "Liberty Jvm Options file Name added to the Config Map",
+        "value": "jvm.options"        
+    },
+     {
+        "name": "key_secret_name",
+        "required": true,
+        "description": "Liberty Jvm Options file Name added to the Config Map"        
+    },
+     {
+        "name": "image_tag",
+        "required": true,
+        "description": "Tag details of the docker image"        
+   },
+    {
+		"name": "keystore_file1",
+		"required": true,
+		"description": "Keystore name added to openshift secrets",
+        "value": "cis-dbkey.jks"
+    },
+     {
+		"name": "keystore_file2",
+       "required": true,
+		"description": "Keystore name added to openshift secrets",
+		"value": "cis-keystore.jks"
+		}
+	]
+}

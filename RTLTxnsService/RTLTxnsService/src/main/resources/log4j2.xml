@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Properties>
+		<Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName}|%X{request.id} --- [%15.15t] %-40.40c{1.}:%L : %m%n
+
+        </Property>
+        <Property name ="MDC_PATTERN">
+        %d{ISO8601}|%X{request.id}|%X{channel}|%X{product.type}|%X{account.id}|%X{request.cursor}|%X{start.date}|%X{end.date}|%X{service.flag}|%X{priorday.time}|%X{blindspot.time}|%X{intraday.time}|%X{outstanding.time}|%X{merchant.info.flag}|%X{txnEnrich.time}|%X{priorday.retry.flag}|%X{priorday.retry.time}|%X{merge.time}|%X{sort.time}|%X{redis.insert}|%X{redis.retrieval}|%X{redis.record.count}|%X{response.record.sent}|%X{response.cursor}|%X{status}|%X{total.timeTaken}|%t|%m%n
+        </Property>
+	</Properties>
+
+	<Appenders>
+		 <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        
+        <Console name="MdcConsoleAppender" target="SYSTEM_OUT"
+			follow="true">
+			<PatternLayout pattern="${MDC_PATTERN}" />
+		</Console>
+		
+		<!-- <RollingFile name="FileAppender" fileName="rtl-txns-svc-v1.log"
+                     filePattern="rtl-txns-svc-v1-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile> -->
+		
+		 <!-- <RollingFile name="MdcFileAppender" fileName="rtl-txns-timer.log"
+                     filePattern="rtl-txns-timer-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>${MDC_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile> -->
+	</Appenders>
+
+<Loggers>
+        <AsyncLogger name="txnlog" level="DEBUG"
+                     additivity="false">
+           <!--  <AppenderRef ref="MdcConsoleAppender"/>-->
+            <AppenderRef ref="ConsoleAppender"/>
+            <!-- <AppenderRef ref="FileAppender"/> -->
+        </AsyncLogger>
+        
+         <AsyncLogger name="txnmdclog" level="DEBUG"
+                     additivity="false">
+           <AppenderRef ref="MdcConsoleAppender"/>
+            <!-- <AppenderRef ref="MdcFileAppender" /> -->
+        </AsyncLogger>
+
+        <Root level="INFO">
+          <!--   <AppenderRef ref="MdcConsoleAppender"/>-->
+            <!-- <AppenderRef ref="MdcFileAppender"/>-->
+            <AppenderRef ref="ConsoleAppender"/>
+            <!-- <AppenderRef ref="FileAppender"/> -->
+        </Root>
+    </Loggers>
+</Configuration>
